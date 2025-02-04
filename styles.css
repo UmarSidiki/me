@@ -857,6 +857,32 @@ nav ul li a:hover {
   border-top: 0;
 }
 
+/* Add these styles before the #ANIMATIONS section */
+.transition-1,
+.transition-2 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-background);
+    z-index: 9999;
+    transform: scaleY(1);
+    transform-origin: top;
+    will-change: transform;
+}
+
+.transition-2 {
+    background-color: var(--color-primary);
+    z-index: 9998;
+}
+
+/* Ensure content is below transitions */
+#content {
+    position: relative;
+    z-index: 1;
+}
+
 /*------------------------------------*\
   #ANIMATIONS
 \*------------------------------------*/

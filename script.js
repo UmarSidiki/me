@@ -1,80 +1,98 @@
 // GSAP Page Transitions
 
 // Removed initial query selectors
-// let links = document.querySelectorAll("nav a");
-// let transition1 = document.querySelector(".transition-1");
-// let transition2 = document.querySelector(".transition-2");
+let links = document.querySelectorAll("nav a");
+let transition1 = document.querySelector(".transition-1");
+let transition2 = document.querySelector(".transition-2");
 const content = document.getElementById("content");
 
 document.addEventListener('DOMContentLoaded', function() {
-  // Apply stored theme, if any
-  if (localStorage.getItem("theme") === "light") {
-    document.body.classList.add("light-mode");
-  }
+    // Initialize GSAP transitions
+    gsap.set(['.transition-1', '.transition-2'], {
+        scaleY: 0
+    });
 
-  fetch('components/header.html')
-    .then(response => response.text())
-    .then(html => {
-      document.getElementById('header').innerHTML = html;
-      
-      // Now query transition elements and nav links
-      window.transition1 = document.querySelector(".transition-1");
-      window.transition2 = document.querySelector(".transition-2");
-      const links = document.querySelectorAll("nav a");
-      links.forEach(link => {
-        link.addEventListener("click", (e) => {
-          e.preventDefault();
-          const href = e.currentTarget.href;
-          
-          // Smoother exit animation
-          gsap.to('.content-wrapper', {
-            opacity: 0,
-            y: 20,
-            duration: 0.3,
-            ease: "power2.inOut"
-          });
-          
-          gsap.to([window.transition1, window.transition2], {
-            scaleY: 1,
-            duration: 0.5,
-            stagger: 0.1,
-            ease: "power2.inOut",
-            onComplete: () => {
-              window.location.href = href;
-            }
-          });
+    // Apply stored theme
+    if (localStorage.getItem("theme") === "light") {
+        document.body.classList.add("light-mode");
+    }
+
+    // Load header and setup navigation
+    fetch('components/header.html')
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('header').innerHTML = html;
+            setupNavigation();
+            setupThemeToggle();
+            animatePageEntry();
         });
-      });
-      
-      const themeToggle = document.getElementById("theme-toggle");
-      themeToggle.textContent = document.body.classList.contains("light-mode") ? "🌞" : "🌙";
-      themeToggle.addEventListener("click", () => {
-        document.body.classList.toggle("light-mode");
-        const isLight = document.body.classList.contains("light-mode");
-        themeToggle.textContent = isLight ? "🌞" : "🌙";
-        localStorage.setItem("theme", isLight ? "light" : "dark");
-      });
+});
 
-      // Smooth entrance animation
-      gsap.from('.content-wrapper', {
+function setupNavigation() {
+    const links = document.querySelectorAll("nav a");
+    const transition1 = document.querySelector(".transition-1");
+    const transition2 = document.querySelector(".transition-2");
+
+    links.forEach(link => {
+        link.addEventListener("click", e => {
+            e.preventDefault();
+            const href = e.currentTarget.href;
+
+            // Exit sequence
+            const tl = gsap.timeline();
+            
+            tl.to('.content-wrapper', {
+                opacity: 0,
+                y: 20,
+                duration: 0.3,
+                ease: "power2.inOut"
+            })
+            .to(transition1, {
+                scaleY: 1,
+                duration: 0.5,
+                ease: "power2.inOut"
+            })
+            .to(transition2, {
+                scaleY: 1,
+                duration: 0.5,
+                ease: "power2.inOut",
+                onComplete: () => {
+                    window.location.href = href;
+                }
+            });
+        });
+    });
+}
+
+function setupThemeToggle() {
+    const themeToggle = document.getElementById("theme-toggle");
+    if (themeToggle) {
+        themeToggle.textContent = document.body.classList.contains("light-mode") ? "🌞" : "🌙";
+        themeToggle.addEventListener("click", () => {
+            document.body.classList.toggle("light-mode");
+            themeToggle.textContent = document.body.classList.contains("light-mode") ? "🌞" : "🌙";
+            localStorage.setItem("theme", document.body.classList.contains("light-mode") ? "light" : "dark");
+        });
+    }
+}
+
+function animatePageEntry() {
+    const tl = gsap.timeline();
+    
+    tl.from('.content-wrapper', {
         opacity: 0,
         y: 20,
         duration: 0.6,
         ease: "power2.out",
         delay: 0.2
-      });
-
-      // Animate in the page transitions if needed
-      gsap.from([window.transition1, window.transition2], {
-        scaleY: 1,
+    })
+    .to(['.transition-1', '.transition-2'], {
+        scaleY: 0,
         duration: 0.5,
         stagger: 0.1,
-        ease: "power2.inOut",
-      });
-    });
-});
-
-
+        ease: "power2.inOut"
+    }, "-=0.5");
+}
 
 // Cursor
 const coords = { x: 0, y: 0 };
